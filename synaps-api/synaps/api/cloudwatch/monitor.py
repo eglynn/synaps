@@ -256,6 +256,12 @@ class MonitorController(object):
                     
             return ret
 
+        def non_null(stat):
+            for statistic, value in stat[1].iteritems():
+                 if not (statistic == 'SampleCount' and value == 0.0):
+                     return True
+            return False
+
         if not (project_id and context.is_admin):
             project_id = context.project_id
         end_time = utils.parse_strtime(end_time)
@@ -277,7 +283,7 @@ class MonitorController(object):
                                                        statistics, unit,
                                                        dimensions)
     
-        datapoints = map(stat_to_datapoint, stats)
+        datapoints = map(stat_to_datapoint, filter(non_null, stats))
         label = metric_name
         
         return {'GetMetricStatisticsResult': {'Datapoints': datapoints,

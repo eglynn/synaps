@@ -337,6 +337,22 @@ class ShortCase(SynapsTestCase):
         
         self.assertAlmostEqual(stat1['SampleCount'], stat2['SampleCount'])
         
+        # Ensure zero sample counts are not reported for periods without
+        # actual datapoints
+
+        way_before_start = start_time - datetime.timedelta(weeks=20*52) 
+        way_before_end = way_before_start + datetime.timedelta(hours=1)
+
+        ancient_stat = self.synaps.get_metric_statistics(
+            period=300, start_time=way_before_start, end_time=way_before_end,
+            metric_name="SampleCountTest", namespace=self.namespace,
+            statistics=['SampleCount'],
+            unit="Bytes",
+            dimensions=self.dimensions,
+        )
+
+        self.assertEqual(len(ancient_stat), 0)
+
     def test_alarm_period(self):
         
         #알람을 생성, MAX_START_PERIOD 를 6000 으로 증가시키는지 테스트.
